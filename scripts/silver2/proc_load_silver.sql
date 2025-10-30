@@ -46,7 +46,7 @@ BEGIN
 			cst_create_date
 		)
 		SELECT
-			cst_id,
+			[cust_id],
 			cst_key,
 			TRIM(cst_firstname) AS cst_firstname,
 			TRIM(cst_lastname) AS cst_lastname,
@@ -64,9 +64,9 @@ BEGIN
 		FROM (
 			SELECT
 				*,
-				ROW_NUMBER() OVER (PARTITION BY cst_id ORDER BY cst_create_date DESC) AS flag_last
+				ROW_NUMBER() OVER (PARTITION BY  [cust_id] ORDER BY cst_create_date DESC) AS flag_last
 			FROM bronze.crm_cust_info
-			WHERE cst_id IS NOT NULL
+			WHERE [cust_id] IS NOT NULL
 		) t
 		WHERE flag_last = 1; -- Select the most recent record per customer
 		SET @end_time = GETDATE();
@@ -106,7 +106,7 @@ BEGIN
 				LEAD(prd_start_dt) OVER (PARTITION BY prd_key ORDER BY prd_start_dt) - 1 
 				AS DATE
 			) AS prd_end_dt -- Calculate end date as one day before the next start date
-		FROM bronze.crm_prd_info;
+		FROM [DataWarehouse].[bronze].[crm_pro_info];
         SET @end_time = GETDATE();
         PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
         PRINT '>> -------------';
@@ -230,7 +230,7 @@ BEGIN
 			cat,
 			subcat,
 			maintenance
-		FROM bronze.erp_px_cat_g1v2;
+		FROM [DataWarehouse].[bronze].[erp_PX_CAT_G1V];
 		SET @end_time = GETDATE();
 		PRINT '>> Load Duration: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR) + ' seconds';
         PRINT '>> -------------';
